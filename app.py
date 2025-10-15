@@ -6,17 +6,21 @@ from datetime import datetime
 import traceback
 import uuid
 from functools import wraps
+import os
 
-app = Flask(_name_)
+# NOTE: Use environment variables for any sensitive values. Defaults are intentionally
+# non-secret placeholders so credentials are not committed in the repository.
+app = Flask(__name__)
 CORS(app)
 
 # Database configuration
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'root',  # CHANGE THIS TO YOUR MYSQL PASSWORD
-    'database': 'smart_exam_cell',
-    'port': 3306
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'user': os.getenv('DB_USER', 'root'),
+    # Do NOT store real passwords in source. Set DB_PASSWORD in the environment.
+    'password': os.getenv('DB_PASSWORD', '<REDACTED_PASSWORD>'),
+    'database': os.getenv('DB_NAME', 'smart_exam_cell'),
+    'port': int(os.getenv('DB_PORT', 3306))
 }
 
 def seed_departments_if_missing():
@@ -134,10 +138,12 @@ def login():
         email = data.get('email')
         password = data.get('password')
         
+        # Demo users (passwords redacted). For real deployments, integrate with
+        # a proper user store and do NOT keep passwords in source control.
         valid_users = {
-            'admin@college.edu': {'password': 'admin123', 'role': 'admin', 'name': 'Admin User'},
-            'faculty@college.edu': {'password': 'faculty123', 'role': 'faculty', 'name': 'Faculty User'},
-            'student@college.edu': {'password': 'student123', 'role': 'student', 'name': 'Student User'}
+            'admin@college.edu': {'password': '<REDACTED_PASSWORD>', 'role': 'admin', 'name': 'Admin User'},
+            'faculty@college.edu': {'password': '<REDACTED_PASSWORD>', 'role': 'faculty', 'name': 'Faculty User'},
+            'student@college.edu': {'password': '<REDACTED_PASSWORD>', 'role': 'student', 'name': 'Student User'}
         }
         
         if email in valid_users and valid_users[email]['password'] == password:
@@ -1019,7 +1025,7 @@ def show_tables():
 
 # ==================== Main ====================
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     print("=" * 50)
     print("College Management System - Backend Server")
     print("=" * 50)
